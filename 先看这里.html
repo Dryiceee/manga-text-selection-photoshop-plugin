@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>漫画文字选区 · Photoshop 插件</title>
+<style>
+body{margin:0;background:#f5f7fa;color:#202936;font:16px/1.8 "Segoe UI","Microsoft YaHei",sans-serif}
+main{max-width:940px;margin:32px auto;padding:32px 40px;background:white;border:1px solid #dce3ec;border-radius:12px}
+nav{color:#64748b;font-size:14px;border-bottom:1px solid #e1e7ef;padding-bottom:16px}
+h1{font-size:30px;line-height:1.35;margin-top:28px}h2{margin-top:38px;font-size:23px;border-bottom:1px solid #e7ecf2;padding-bottom:8px}
+a{color:#175dc0}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f0f4f9;padding:18px;border-radius:8px;border:1px solid #dde5ef;line-height:1.65;font-size:14px}
+code{font-family:Consolas,"Microsoft YaHei",monospace}:not(pre)>code{background:#f0f4f9;padding:2px 5px;border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{border:1px solid #dce3ec;padding:10px;text-align:left;vertical-align:top}th{background:#f0f4f9}
+li{margin:5px 0}footer{margin-top:36px;color:#64748b;font-size:13px}@media(max-width:700px){main{margin:0;padding:24px 18px;border:0;border-radius:0}h1{font-size:26px}}
+</style></head><body><main><nav><a href="先看这里.html">返回部署包首页</a> · Windows x64 · CPU · v1.0.0</nav>
+<h1>漫画文字选区 · Photoshop 插件</h1>
+<p>Manga Text Selection for Adobe Photoshop：先用矩形或套索建立选区，点击“选中区域内文字”，由本机运行的漫画文字分割模型选中该范围内的文字笔画像素。只修改选区，不修改图片，可以 Ctrl+Z 撤销。不做 OCR、翻译或背景修复。</p>
+<p><strong>v1.0.0 · Windows x64 + CPU · Photoshop 25.0 或更高版本。</strong> 本项目包含插件、本地模型服务、部署脚本和中文教程；模型权重来自原作者的 <a href="https://huggingface.co/a-b-c-x-y-z/Manga-Text-Segmentation-2025">Manga-Text-Segmentation-2025</a>，不随本项目分发，部署时按固定版本下载并校验。首次部署需要联网下载 Python 依赖和权重。</p>
+<h2>自己部署</h2>
+<ol>
+<li>从 GitHub Releases 下载 <code>Manga-Text-Selection-v1.0.0.zip</code>，完整解压到较短的固定文件夹，例如 <code>D:\MangaText</code>。</li>
+<li>按教程安装 Python 3.12 x64。</li>
+<li>双击 <code>01-安装部署.cmd</code>，等待“部署检查通过”。</li>
+<li>双击 <code>03-安装PS插件.cmd</code> 或安装刚生成的 <code>.ccx</code>。</li>
+<li>在 PS 里建立选区，打开插件面板，点击“选中区域内文字”。</li>
+</ol>
+<p><strong>先部署，再安装插件。</strong> 部署会把安装包里的模型位置绑定到你自己的电脑。移动文件夹后，重新生成并重新安装插件。整个文件夹需要保留。</p>
+<p><a href="%E6%95%99%E7%A8%8B/01-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2%E4%B8%8E%E4%BD%BF%E7%94%A8.html">打开详细手动教程</a></p>
+<h2>让 agent 帮你部署</h2>
+<p>把解压目录交给能够访问本机文件、运行命令的 agent，复制教程中的完整提示词。提示词包含安装、校验、模型接口、PS 实测和退出管理要求。</p>
+<p><a href="%E6%95%99%E7%A8%8B/02-Agent%E9%83%A8%E7%BD%B2%E6%8F%90%E7%A4%BA%E8%AF%8D.html">打开可复制的 agent 提示词</a></p>
+<h2>功能</h2>
+<ul>
+<li>只选中原选区范围内的文字笔画像素，保留套索和羽化限制。</li>
+<li>模型没开时自动启动；面板可手动关闭模型。</li>
+<li>退出全部 PS 后自动关闭模型，下一次检测自动再启动。</li>
+<li>也提供本地网页单张/批量处理。</li>
+</ul>
+<p><a href="%E6%95%99%E7%A8%8B/03-%E6%9D%A5%E6%BA%90%E4%B8%8E%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E.html">来源、版本与文件说明</a></p>
+<p>包内 <code>.ccx</code> 最初是未配置模板，部署脚本会重新生成本机有效安装包。包内没有作者的 Python 环境、漫画、运行日志、输出或控制许可。部署后的环境约需 5 GB 可用空间。</p>
+<footer>漫画文字选区分享包 · 模型来源及固定版本见来源说明 · 首次安装后请在自己的 PS 内测试。</footer></main></body></html>

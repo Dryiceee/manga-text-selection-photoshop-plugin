@@ -1,0 +1,11 @@
+# Generated on each computer during deployment
+Manga-Text-Segmentation/.venv/
+Manga-Text-Segmentation/model.pth
+Manga-Text-Segmentation/model.pth.part
+Manga-Text-Segmentation/.control-token
+Manga-Text-Segmentation/cache/
+Manga-Text-Segmentation/results/
+Manga-Text-Segmentation/server.pid
+Manga-Text-Segmentation/startup.lock
+*.log
+__pycache__/

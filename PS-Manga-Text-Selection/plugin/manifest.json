@@ -1,0 +1,56 @@
+{
+  "manifestVersion": 5,
+  "id": "com.jiayu.manga-text-selection.local",
+  "name": "漫画文字选区",
+  "version": "1.0.0",
+  "main": "main.js",
+  "host": {
+    "app": "PS",
+    "minVersion": "25.0.0",
+    "data": {
+      "apiVersion": 2
+    }
+  },
+  "requiredPermissions": {
+    "network": {
+      "domains": [
+        "http://localhost",
+        "http://localhost:7860",
+        "http://localhost:7860/"
+      ]
+    },
+    "launchProcess": {
+      "extensions": [
+        ".vbs"
+      ]
+    }
+  },
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "mangaTextPanel",
+      "label": {
+        "default": "漫画文字选区"
+      },
+      "minimumSize": {
+        "width": 280,
+        "height": 380
+      },
+      "preferredDockedSize": {
+        "width": 300,
+        "height": 440
+      },
+      "preferredFloatingSize": {
+        "width": 320,
+        "height": 440
+      }
+    },
+    {
+      "type": "command",
+      "id": "selectMangaText",
+      "label": {
+        "default": "选中区域内文字"
+      }
+    }
+  ]
+}

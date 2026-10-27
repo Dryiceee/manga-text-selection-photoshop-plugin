@@ -1,0 +1,184 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>漫画文字选区：手动部署与使用</title>
+<style>
+body{margin:0;background:#f5f7fa;color:#202936;font:16px/1.8 "Segoe UI","Microsoft YaHei",sans-serif}
+main{max-width:940px;margin:32px auto;padding:32px 40px;background:white;border:1px solid #dce3ec;border-radius:12px}
+nav{color:#64748b;font-size:14px;border-bottom:1px solid #e1e7ef;padding-bottom:16px}
+h1{font-size:30px;line-height:1.35;margin-top:28px}h2{margin-top:38px;font-size:23px;border-bottom:1px solid #e7ecf2;padding-bottom:8px}
+a{color:#175dc0}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f0f4f9;padding:18px;border-radius:8px;border:1px solid #dde5ef;line-height:1.65;font-size:14px}
+code{font-family:Consolas,"Microsoft YaHei",monospace}:not(pre)>code{background:#f0f4f9;padding:2px 5px;border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{border:1px solid #dce3ec;padding:10px;text-align:left;vertical-align:top}th{background:#f0f4f9}
+li{margin:5px 0}footer{margin-top:36px;color:#64748b;font-size:13px}@media(max-width:700px){main{margin:0;padding:24px 18px;border:0;border-radius:0}h1{font-size:26px}}
+</style></head><body><main><nav><a href="../先看这里.html">返回部署包首页</a> · Windows x64 · CPU · v1.0.0</nav>
+<h1>漫画文字选区：手动部署与使用</h1>
+<p>本包包含模型服务源码、Photoshop 插件源码和安装包模板；模型权重由部署脚本从原作者的 Hugging Face 仓库下载。用途是：先在漫画上建立选区，再选中该范围里的文字笔画像素。它不做 OCR、翻译或背景修复。</p>
+<p><strong>安装顺序：完整解压 → 安装 Python 3.12 x64 → 运行部署 → 安装重新生成的插件 → 在 PS 中测试。</strong> 请先部署再装插件：部署脚本会把安装包里的模型路径改成你这台电脑的位置。</p>
+<h2>1. 确认电脑和软件</h2>
+<ul>
+<li>本包支持 <strong>Windows 10/11 x64</strong>。Mac、Linux、Windows ARM 需要另外适配。</li>
+<li>Photoshop <strong>25.0 或更高版本</strong>；开发时在 Photoshop 2026 / 27.11 验证。还需要 Adobe Creative Cloud Desktop 用于安装 <code>.ccx</code> 插件。</li>
+<li>模型使用 CPU，不要求 NVIDIA 显卡，不需要安装 CUDA。</li>
+<li>建议在 16 GB 或更多内存的电脑上使用；这是结合 Photoshop 和本地推理的部署建议，不能据此保证每台电脑都同速。<a href="https://helpx.adobe.com/photoshop/desktop/get-started/technical-requirements-installation/adobe-photoshop-on-desktop-technical-requirements.html">Adobe 系统要求</a>也推荐 Photoshop 使用 16 GB 或更多内存。</li>
+<li>请给模型、运行环境和安装临时文件预留约 <strong>5 GB</strong> 可用空间；之后的漫画输出还需要额外空间。</li>
+<li>模型权重不随本包分发，部署时从原作者的 Hugging Face 仓库按固定版本下载（约 217 MB）并校验 SHA256。第一次下载权重、安装 Python 和依赖需要联网，部署完成后本地推理不需要访问模型网站。</li>
+</ul>
+<h2>2. 完整解压到固定位置</h2>
+<p>右键压缩包，选择“全部提取”或使用解压工具。不要直接在压缩软件里运行脚本。</p>
+<p>例如放到 <code>D:\MangaText</code>，确保该目录内能看见：</p>
+<pre><code class="language-text">01-安装部署.cmd
+02-检查部署.cmd
+03-安装PS插件.cmd
+04-重新生成插件.cmd
+deploy.py
+Manga-Text-Segmentation/
+PS-Manga-Text-Selection/
+教程/
+</code></pre>
+<p>请选择你有写入权限的普通文件夹，不要放在 Photoshop 安装目录或 Program Files 内。中文和空格路径可以使用，但路径尽量不要过长。部署完成后保留整个文件夹：插件启动模型需要它。</p>
+<p>若解压工具自动创建了一层同名子文件夹，请进入含 <code>01-安装部署.cmd</code> 的那个文件夹；也可以把这个文件夹改成 <code>D:\MangaText</code> 这样的短路径。脚本发现路径太长时会在安装前停下并提示移动，避免 Windows 的文件名长度限制。</p>
+<h2>3. 安装 Python 3.12 的 64 位版本</h2>
+<p>已经装有 Python 3.12 x64 的人可以跳过此步骤。在终端输入：</p>
+<pre><code class="language-powershell">py -3.12 --version
+</code></pre>
+<p>新安装可从 <a href="https://www.python.org/downloads/">Python 官网</a>下载 <strong>Python install manager</strong>。安装完成后打开一个新的终端，运行：</p>
+<pre><code class="language-powershell">py install 3.12
+py -3.12 --version
+</code></pre>
+<p>选择 3.12 的 x64 运行时。安装管理器用法见 <a href="https://docs.python.org/3/using/windows.html">Python 官方 Windows 文档</a>。如果旧版 <code>py</code> 不认识 <code>install</code> 命令，说明你使用的是旧启动器：可安装官方管理器，或使用已经安装好的 Python 3.12 x64。</p>
+<p>不要为了这份包改用 Python 3.14，也不要把 <code>python.exe</code> 单独复制过来。自动脚本会检测 Python 3.12 和位数。没有找到 Python 时，它会保留错误窗口并提供提示。</p>
+<h2>4. 运行部署脚本</h2>
+<p>先保存并退出 Photoshop。双击根目录的 <strong><code>01-安装部署.cmd</code></strong>。</p>
+<p>脚本依次完成：</p>
+<ol>
+<li>校验包内文件；下载模型权重并校验 SHA256（已有正确的 <code>model.pth</code> 时跳过下载）。</li>
+<li>在模型目录新建独立 <code>.venv</code> 环境。</li>
+<li>安装 CPU 版 PyTorch 2.8.0 / torchvision 0.23.0，以及固定版本的其他依赖。</li>
+<li>为你这台电脑生成模型启动路径和控制许可。</li>
+<li>重新生成 <code>PS-Manga-Text-Selection/漫画文字选区.ccx</code>。</li>
+<li>用真实模型检测一张合成测试图，检查接口和掩膜尺寸。</li>
+</ol>
+<p>第一次安装需要下载依赖，时间取决于网速，可能要几分钟或更久。它和日常启动模型的几秒等待不是一回事。看到 <strong>“部署检查通过”</strong> 才继续安装插件；有报错时先看根目录的 <code>deploy.log</code>。</p>
+<p>这一步不会安装 Photoshop，也不会改变系统 Python 的包。依赖安装在当前包自己的 <code>.venv</code> 内。<a href="https://pytorch.org/get-started/previous-versions/">PyTorch 官方版本说明</a>列出了本包采用的 CPU 版安装方式。</p>
+<p>喜欢自己敲命令的人，也可以在解压目录运行：</p>
+<pre><code class="language-powershell">py -3.12 -u deploy.py deploy
+</code></pre>
+<p>仅重新绑定路径和生成插件，不重新安装依赖：</p>
+<pre><code class="language-powershell">py -3.12 -u deploy.py prepare
+</code></pre>
+<h2>5. 安装 PS 插件</h2>
+<p>部署成功后，双击 <strong><code>03-安装PS插件.cmd</code></strong>；它会调用 Adobe 官方安装器。也可以双击刚生成的 <code>PS-Manga-Text-Selection/漫画文字选区.ccx</code>，在 Creative Cloud Desktop 中确认安装。</p>
+<p>压缩包最初包含的 <code>.ccx</code> 是模板；必须先运行第 4 步，才能得到绑定你本机位置的安装包。不要安装好友部署后再传给你的 <code>.ccx</code>，因为它会绑定好友的路径；让你的部署脚本重新生成即可。</p>
+<p>正常安装不需要打开开发者模式。<a href="https://developer.adobe.com/uxp/guides/how-to/distribution/install/">Adobe 官方安装说明</a>支持双击 <code>.ccx</code> 或使用 UPIA。若没有安装器，请安装或修复 Creative Cloud Desktop。若已有同名旧版本且安装失败，在 Creative Cloud 的“管理插件”中卸载本插件后再安装。</p>
+<p>打开 Photoshop，在 <strong>“增效工具/插件 → 漫画文字选区 → 漫画文字选区”</strong> 打开面板。请使用面板内的蓝色按钮。</p>
+<h2>6. 建立文字选区</h2>
+<ol>
+<li>打开一张漫画图片。</li>
+<li>用矩形、套索等工具圈住要处理的范围。</li>
+<li>点击 <strong>“选中区域内文字”</strong>。</li>
+<li>模型未运行时，插件会启动本机模型。首次会弹出允许打开 <code>start-hidden.vbs</code> 的请求，选择“允许”；可勾选“记住我的选择”。这是 Adobe 的启动授权，不需要关闭系统安全功能。</li>
+<li>等待加载和检测结束，检查文字周围的选区。</li>
+</ol>
+<p>插件读取可见图层合成后的画面。只修改选区，不修改图像像素。检测结果与原始选区取交集，套索边界和羽化范围也会限制结果。<code>Ctrl+Z</code> 可以撤销选区变更。测试时先用一份图片副本，确认效果后再填充、删除或创建蒙版。</p>
+<p>尚未建立选区时不会启动模型；没有检测到文字时保留原选区。等待加载或检测期间不要切换文档、修改图片或选区，否则插件会拒绝应用旧结果。</p>
+<h2>7. 参数怎么调</h2>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>默认值</th>
+<th>调整方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文字阈值</td>
+<td>0.5</td>
+<td>漏选文字可试 0.4；把画面线条误选成文字可试 0.6。</td>
+</tr>
+<tr>
+<td>扩展像素</td>
+<td>2</td>
+<td>0 更贴近预测笔画；1–3 可补一些边缘。扩展后仍不超出原选区。</td>
+</tr>
+<tr>
+<td>推理长边</td>
+<td>1600</td>
+<td>太慢可用 1024；小字漏检可试 2048。越大越耗时、越占内存。</td>
+</tr>
+</tbody>
+</table>
+<p>参数范围：阈值 0.1–0.9，扩展 0–10，长边 512–2560；单次 PS 选区最多 1600 万像素。模型可能漏选或误选，不同漫画需要调整。</p>
+<h2>8. 模型怎样启动和关闭</h2>
+<ul>
+<li><strong>自动启动</strong>：点击“选中区域内文字”，模型没开就启动，加载好后继续检测。日常速度取决于你的 CPU、选区大小和参数，不能按开发者电脑的耗时保证。</li>
+<li><strong>手动关闭</strong>：点击面板中的“关闭模型”。模型确认请求后自行退出，释放内存；有任务时等待任务结束。</li>
+<li><strong>自动关闭</strong>：由 PS 插件启动或接管的服务，在当前 Windows 会话里的所有 Photoshop 进程退出后约 5–8 秒关闭。正式版和 Beta 同时开着时要全部退出。仅关闭面板不会关闭模型。</li>
+<li><strong>再次使用</strong>：下一次检测会重新启动模型，无需重开 Photoshop。</li>
+<li><strong>检查连接</strong>：只检查已运行的服务，不会启动模型。</li>
+</ul>
+<p>同一个服务也提供网页界面。关闭模型会一起停止网页接口；已经保存的文件保留。</p>
+<h2>9. 网页单张和批量处理</h2>
+<p>双击模型目录的 <code>start.cmd</code>，打开 <code>http://127.0.0.1:7860/</code>。单张图片能下载掩膜、标记和涂白结果；“批量处理”可以同时选择多张图片。</p>
+<p>批量输出保存在 <code>Manga-Text-Segmentation/results/时间_批次编号/</code>：<code>masks</code> 是文字掩膜，<code>cleaned</code> 是涂白图，<code>overlays</code> 是标记图，还提供结果 ZIP。网页单张结果使用 <code>cache</code> 临时目录，建议及时下载需要的结果。</p>
+<p>单独启动网页且没使用 PS 插件时，模型保持运行；使用插件后会启用退出 PS 自动关闭。需要手动停止，可双击模型目录里的 <code>stop.cmd</code>。</p>
+<h2>10. 常见问题</h2>
+<table>
+<thead>
+<tr>
+<th>情况</th>
+<th>处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>找不到 Python 3.12</td>
+<td>安装 3.12 x64，重新打开终端再检查。agent 使用其他位置的运行时可设置 <code>MANGA_PYTHON_EXE</code>。</td>
+</tr>
+<tr>
+<td>依赖下载失败</td>
+<td>查看 <code>deploy.log</code>，检查网络和代理。允许按原版本重试，不要随机改成最新版依赖。</td>
+</tr>
+<tr>
+<td>模型权重下载失败</td>
+<td>检查网络和代理后重新运行部署，未下完的文件会继续下载。也可以用浏览器打开报错里给出的地址下载 <code>model.pth</code>，放进 <code>Manga-Text-Segmentation</code> 文件夹，再运行部署；脚本会校验 SHA256。</td>
+</tr>
+<tr>
+<td>文件名太长、WinError 206</td>
+<td>将包含脚本的整个解压目录移到较短路径，例如 <code>D:\MangaText</code>，再部署。不需要修改系统注册表。</td>
+</tr>
+<tr>
+<td>提示没有 <code>venv</code> 或 <code>pip</code></td>
+<td>当前 Python 不完整。使用完整 Python 3.12 运行时，不要使用仅有一个 exe 的复制品。</td>
+</tr>
+<tr>
+<td>模板提示尚未部署</td>
+<td>运行 <code>01-安装部署.cmd</code>，安装它重新生成的 <code>.ccx</code>。</td>
+</tr>
+<tr>
+<td>移动了文件夹</td>
+<td>运行 <code>04-重新生成插件.cmd</code>，退出 PS，重新安装生成的 <code>.ccx</code>。若 <code>.venv</code> 也失效，改名旧 <code>.venv</code> 后重新部署。</td>
+</tr>
+<tr>
+<td>无法连接或启动超时</td>
+<td>看 <code>launch-error.log</code>、<code>server-error.log</code>。可先双击 <code>PS-Manga-Text-Selection/start-model.cmd</code> 手动启动，再“检查连接”。</td>
+</tr>
+<tr>
+<td>端口 7860 已被其他程序占用</td>
+<td>确认占用程序；不要随意结束别的进程。需要改端口时让 agent 同步修改模型、插件 URL 和 manifest 权限。</td>
+</tr>
+<tr>
+<td>首次启动授权被拒绝</td>
+<td>再点检测并允许启动脚本，或先手动启动模型。系统禁用 VBS 时使用手动启动，或让 agent 适配启动器。</td>
+</tr>
+<tr>
+<td>Windows 缺少 DLL、CPU 报非法指令</td>
+<td>使用 <code>02-检查部署.cmd</code> 获取具体错误；让 agent 检查 CPU 和微软运行库，不要去不明网站下载单个 DLL。</td>
+</tr>
+<tr>
+<td>停止按钮连接失败</td>
+<td>未确认状态不会误报成功；可退出全部 PS 等待自动关闭，或使用包内 <code>stop.cmd</code>。</td>
+</tr>
+</tbody>
+</table>
+<p>首次部署检查通过后，仍需要你在自己的 Photoshop 内用漫画测试。这个检查验证安装、真实模型和数据接口，不代替每台电脑的实际选区测试。</p>
+<footer>漫画文字选区分享包 · 模型来源及固定版本见来源说明 · 首次安装后请在自己的 PS 内测试。</footer></main></body></html>

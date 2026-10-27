@@ -1,0 +1,104 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>来源、版本与文件说明</title>
+<style>
+body{margin:0;background:#f5f7fa;color:#202936;font:16px/1.8 "Segoe UI","Microsoft YaHei",sans-serif}
+main{max-width:940px;margin:32px auto;padding:32px 40px;background:white;border:1px solid #dce3ec;border-radius:12px}
+nav{color:#64748b;font-size:14px;border-bottom:1px solid #e1e7ef;padding-bottom:16px}
+h1{font-size:30px;line-height:1.35;margin-top:28px}h2{margin-top:38px;font-size:23px;border-bottom:1px solid #e7ecf2;padding-bottom:8px}
+a{color:#175dc0}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f0f4f9;padding:18px;border-radius:8px;border:1px solid #dde5ef;line-height:1.65;font-size:14px}
+code{font-family:Consolas,"Microsoft YaHei",monospace}:not(pre)>code{background:#f0f4f9;padding:2px 5px;border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{border:1px solid #dce3ec;padding:10px;text-align:left;vertical-align:top}th{background:#f0f4f9}
+li{margin:5px 0}footer{margin-top:36px;color:#64748b;font-size:13px}@media(max-width:700px){main{margin:0;padding:24px 18px;border:0;border-radius:0}h1{font-size:26px}}
+</style></head><body><main><nav><a href="../先看这里.html">返回部署包首页</a> · Windows x64 · CPU · v1.0.0</nav>
+<h1>来源、版本与文件说明</h1>
+<p>版本：<strong>1.0.0 正式版（Windows CPU 部署包）</strong>。插件、模型服务和部署脚本统一为这个版本。</p>
+<p>相对之前私下分发的测试包（1.1.0 / 1.1.1）：</p>
+<ul>
+<li>修复首次自动启动常报“启动超时”、多试几次才可用的问题。Windows 解析 <code>localhost</code> 时先试 IPv6 <code>::1</code>，服务原先只监听 IPv4，每次新连接要先等约 2 秒，而启动等待中的单次检查只给 1 秒。现在服务同时监听本机 IPv4 和 IPv6 回环地址，单次检查超时放宽到 5 秒。</li>
+<li>模型权重不再随包分发，部署时从原作者仓库下载并校验。</li>
+</ul>
+<p>用过测试包的人请在新文件夹重新部署，并安装新生成的插件；插件 ID 不变，新版会替换旧版。</p>
+<h2>模型</h2>
+<ul>
+<li>名称：Manga-Text-Segmentation-2025。</li>
+<li>原作者仓库：<a href="https://huggingface.co/a-b-c-x-y-z/Manga-Text-Segmentation-2025">a-b-c-x-y-z / Manga-Text-Segmentation-2025</a>。</li>
+<li>模型结构：U-Net++，EfficientNetV2 骨干。</li>
+<li>固定 revision：<code>2dde9eeb03e81692c1562059451c2bf30e1a13da</code>。</li>
+<li>权重大小：216,911,417 字节。</li>
+<li>权重 SHA256：<code>a0a895dc385608554a81ca765b0c62d654462c2bac661abdff63634985ab37fc</code>。</li>
+<li>CPU 加载使用 <code>weights_only=True</code>、完整参数严格匹配，不下载额外 ImageNet 权重。</li>
+</ul>
+<p>原模型页面提供了论文及数据集引用，模型和训练资料的权利归原作者及各自权利人。本项目不分发原权重，只记录来源、固定版本和校验值，由使用者部署时从原仓库下载，也不给原权重附加自创许可证；截至整理时，模型卡没有明确的许可证元数据，相关使用条件请查看原仓库及作者说明。包内没有漫画训练数据或开发者的测试漫画。</p>
+<h2>程序</h2>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>deploy.py</code></td>
+<td>创建环境、安装固定依赖、准备本机插件并验证。</td>
+</tr>
+<tr>
+<td><code>prepare_plugin.py</code></td>
+<td>写入本机模型路径，生成控制许可，重新打包 CCX。</td>
+</tr>
+<tr>
+<td><code>check_deployment.py</code></td>
+<td>验证依赖、权重、路径、真实模型推理及接口。</td>
+</tr>
+<tr>
+<td><code>bootstrap.ps1</code></td>
+<td>给双击脚本寻找完整 Python 3.12 x64，使用 Windows 自带 PowerShell。</td>
+</tr>
+<tr>
+<td><code>payload-sha256.json</code></td>
+<td>发布时不可变文件的 SHA256 清单；运行生成的配置、CCX 不在此清单中。</td>
+</tr>
+<tr>
+<td><code>Manga-Text-Segmentation/app.py</code></td>
+<td>中文网页单张/批量处理与本地模型。</td>
+</tr>
+<tr>
+<td><code>Manga-Text-Segmentation/ps_api.py</code></td>
+<td>本机 RGB 输入、灰度掩膜输出、接管及关闭接口。</td>
+</tr>
+<tr>
+<td><code>Manga-Text-Segmentation/model_lifecycle.py</code></td>
+<td>检查当前会话的 Photoshop 进程，在退出后关闭自己的服务。</td>
+</tr>
+<tr>
+<td><code>Manga-Text-Segmentation/launch.py</code></td>
+<td>复用或后台启动模型，避免重复加载。</td>
+</tr>
+<tr>
+<td><code>Manga-Text-Segmentation/start-hidden.vbs</code></td>
+<td>由 PS 授权后隐藏启动模型。</td>
+</tr>
+<tr>
+<td><code>PS-Manga-Text-Selection/plugin/</code></td>
+<td>Photoshop UXP 插件源码。</td>
+</tr>
+<tr>
+<td><code>PS-Manga-Text-Selection/漫画文字选区.ccx</code></td>
+<td>初始是未绑定模板，部署后被本机有效安装包替换。</td>
+</tr>
+</tbody>
+</table>
+<p><code>.venv</code>、<code>.control-token</code>、<code>deploy.log</code>、<code>server.pid</code>、服务日志、<code>cache</code>、<code>results</code> 和本机插件配置会在部署或运行后生成。它们不应从发送者电脑直接搬过来。本包没有发送者的运行环境、漫画、输出、日志或私有控制许可。</p>
+<p>模型运行仅监听本机回环地址 <code>127.0.0.1:7860</code> 和 <code>[::1]:7860</code>（电脑不支持 IPv6 时只用前者），不对局域网开放；插件网络权限仅允许 <code>localhost</code>。打开 <code>.vbs</code> 的权限用于启动这个本地模型。关闭和接管接口使用本机新生成的控制许可，该许可不会由健康接口公开。</p>
+<h2>官方资料</h2>
+<ul>
+<li><a href="https://huggingface.co/a-b-c-x-y-z/Manga-Text-Segmentation-2025">模型原始页面</a></li>
+<li><a href="https://www.python.org/downloads/">Python 下载</a></li>
+<li><a href="https://docs.python.org/3/using/windows.html">Python Windows 安装说明</a></li>
+<li><a href="https://pytorch.org/get-started/previous-versions/">PyTorch 固定版本安装说明</a></li>
+<li><a href="https://developer.adobe.com/uxp/guides/how-to/distribution/install/">Adobe CCX 安装说明</a></li>
+<li><a href="https://developer.adobe.com/uxp/guides/how-to/recipes/external-process/">Adobe 本地进程启动与授权</a></li>
+</ul>
+<h2>检查范围</h2>
+<p>原实现已在开发者电脑的 Photoshop 2026 / 27.11 内验证真实漫画选区、自动启动、手动关闭和退出后自动关闭。分享包会另外在新的目录和新建的 Python 环境中检查部署及真实模型接口。检查通过不代表已经在收件人的 Photoshop 上测试；收件人仍需要按教程测试实际漫画。</p>
+<footer>漫画文字选区分享包 · 模型来源及固定版本见来源说明 · 首次安装后请在自己的 PS 内测试。</footer></main></body></html>
