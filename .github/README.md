@@ -1,4 +1,4 @@
-# 漫画去字选区助手 · Photoshop 插件
+# 漫画文字选区助手 · Photoshop 插件
 
 > PS 面板名称：**漫画文字选区** · Manga Text Selection for Adobe Photoshop · Windows x64 · 本地 CPU 推理
 
